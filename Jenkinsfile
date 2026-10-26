@@ -11,7 +11,7 @@ pipeline{
             steps{
                 sh '''
                 #!/bin/bash
-                PWD
+                pwd
                 ls -lrt
                 sleep 5
                 '''
