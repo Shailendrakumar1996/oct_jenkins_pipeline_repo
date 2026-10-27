@@ -1,0 +1,35 @@
+pipeline{
+        agent any
+            parameters{
+                string{name:'NAME',defaultValue:'',description:'please tell me your name'}
+                booleanparam{name:'SKIP_TEST',defaultValue:'False',description:'want to skip test runs to ditect deploy'}
+                choice{name:'Branch',choices:['dev','test','staging','prod'],description:''}
+            }
+                stages{
+                        stage(stage1){
+                            agent {label 'slave1'}
+                            steps{
+                                echo  "NAME: ${params.NAME}"
+                                echo "SKIP_TEST: ${params.SKIP_TEST}"
+                                echo "BRANCH TO DEPLOY: ${params.BRANCH}"
+
+                                
+                            }
+
+                        }
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
