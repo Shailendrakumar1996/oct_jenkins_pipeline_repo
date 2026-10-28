@@ -1,36 +1,70 @@
 pipeline {
     agent any
 
+    parameters {
+        booleanParam(name: 'DEPLOY', description: 'Want to deploy to Production')
+    }
+    
+    environment {
+        CURRENT_ENV = 'prod'
+    }
+
     stages {
-        stage('STAGE1') {
+        stage('CEHCKOUT_REPOA') {
             steps {
-               echo "This is stage1 running"
-               sh 'sleep 5'
-            }
-        }
-        
-        stage('PARALLEL TESTING') {
-            parallel {
-                stage('WINDOWS TESTING') {
-                    steps {
-                    echo "This is WINDOWS testing running"
-                    sh 'sleep 5'
-                    }
-                }
-
-                stage('MACOS TESTING') {
-                    steps {
-                        echo "This is MACOS testing running"
-                        sh 'sleep 5'
-                    }
-                }
+                checkout ([ $class: 'GitSCM',
+                            branches: [[name: '*/main']], 
+                            extensions: [], 
+                            userRemoteConfigs: [[
+                                credentialsId: 'jaintpharsha', 
+                                url: 'https://github.com/jaintpharsha/mern_3tire.git'
+                            ]]
+                        ])
+               
+                sh '''
+                    echo GIT_BRANCH: $GIT_BRANCH
+                    echo BRANCH_NAME: $BRANCH_NAME
+                '''
             }
         }
 
-        stage('FINAL') {
+        stage('STAGE1 When branch main') {
+            when {
+                expression {
+                    return env.GIT_BRANCH == 'origin/main'
+                }
+            }
             steps {
-               echo "This is FINAL running"
-               sh 'sleep 5'
+                echo "This is stage1 running"
+                sh ''' 
+                    pwd
+                    ls -lrt
+                    sleep 5
+                '''
+            }
+        }
+
+        stage('when environment') {
+            when {
+                environment name: 'CURRENT_ENV', value: 'prod'
+            }
+            steps {
+                echo "This is FINAL running"
+                sh '''
+                    pwd
+                    ls -lrt
+                    sleep 5
+                '''
+            }
+        }
+
+        stage('when parameter') {
+            when {
+                expression { params.DEPLOY == true }
+            }
+            steps {
+                echo "This is FINAL running"
+                sh 'sleep 5'
             }
         }
     }
